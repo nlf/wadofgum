@@ -314,7 +314,7 @@ lab.experiment('model', function () {
             }));
         };
 
-        Plugin.preValidate = function (collection) {
+        Plugin.prototype.preValidate = function (collection) {
 
             this.id = 'other_id';
         };
