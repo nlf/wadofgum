@@ -4,10 +4,7 @@ var Schema = require('./lib/schema');
 module.exports = function (options) {
 
     options = options || {};
-
     var self = this;
-    self._preValidate = [];
-
     Schema.validate(options, function (err, schema) {
 
         if (err) {
