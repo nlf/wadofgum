@@ -218,64 +218,35 @@ lab.experiment('model', function () {
             }
         });
 
-        User.use({
-            initialize: function (collection) {
-                expect(collection).to.exist();
-                expect(collection.name).to.equal('user');
-                expect(collection.schema.isJoi).to.equal(true);
+        var initCalled = false;
 
-                var user = new User();
-                expect(user.test).to.exist();
-                expect(user.test()).to.equal(true);
-                done();
-            },
-            methods: {
-                test: function () {
-                    return true;
-                }
-            }
-        });
-    });
+        var Plugin = function (collection) {
 
-    lab.test('can use a plugin that only has an initialize method', function (done) {
+            expect(collection).to.exist();
+            expect(collection.name).to.equal('user');
+            expect(collection.schema.isJoi).to.equal(true);
+            expect(initCalled).to.equal(false);
+            initCalled = true;
+        };
 
-        var User = new WOG({
-            name: 'user',
-            schema: {
-                name: Joi.string().required(),
-                age: Joi.number().integer().default(20)
-            }
-        });
+        Plugin.prototype.test = function () {
+            return this.name;
+        };
 
-        User.use({
-            initialize: function (collection) {
-                expect(collection).to.exist();
-                done();
-            }
-        });
-    });
+        Plugin.test = function () {
+            return true;
+        };
 
-    lab.test('can use a plugin that only has methods defined', function (done) {
+        User.use(Plugin);
 
-        var User = new WOG({
-            name: 'user',
-            schema: {
-                name: Joi.string().required(),
-                age: Joi.number().integer().default(20)
-            }
-        });
+        expect(initCalled).to.equal(true);
 
-        User.use({
-            methods: {
-                test: function () {
-                    return true;
-                }
-            }
-        });
-
-        var user = new User();
+        var user = new User({ name: 'test' });
         expect(user.test).to.exist();
-        expect(user.test()).to.equal(true);
+        expect(user.test()).to.equal('test');
+
+        expect(User.test).to.exist();
+        expect(User.test()).to.equal(true);
         done();
     });
 
@@ -291,7 +262,7 @@ lab.experiment('model', function () {
 
         expect(function () {
             User.use();
-        }).to.throw();
+        }).to.throw('Plugin must be a constructor method');
 
         done();
     });
@@ -306,16 +277,17 @@ lab.experiment('model', function () {
             }
         });
 
-        User.use({
-            initialize: function (collection) {
-                expect(collection).to.exist();
-                expect(collection.schema).to.exist();
-                expect(collection.schema.isJoi).to.equal(true);
-                collection.schema = collection.schema.concat(Joi.object().keys({
-                    id: Joi.string().default('some_id')
-                }));
-            }
-        });
+        var Plugin = function (collection) {
+
+            expect(collection).to.exist();
+            expect(collection.schema).to.exist();
+            expect(collection.schema.isJoi).to.equal(true);
+            collection.schema = collection.schema.concat(Joi.object().keys({
+                id: Joi.string().default('some_id')
+            }));
+        };
+
+        User.use(Plugin);
 
         var user = new User();
         user.validate();
@@ -333,18 +305,21 @@ lab.experiment('model', function () {
             }
         });
 
-        User.use({
-            initialize: function (collection) {
-                expect(collection).to.exist();
-                expect(collection.schema.isJoi).to.equal(true);
-                collection.schema = collection.schema.concat(Joi.object().keys({
-                    id: Joi.string().default('some_id')
-                }));
-            },
-            preValidate: function (collection) {
-                this.id = 'other_id';
-            }
-        });
+        var Plugin = function (collection) {
+
+            expect(collection).to.exist();
+            expect(collection.schema.isJoi).to.equal(true);
+            collection.schema = collection.schema.concat(Joi.object().keys({
+                id: Joi.string().default('some_id')
+            }));
+        };
+
+        Plugin.preValidate = function (collection) {
+
+            this.id = 'other_id';
+        };
+
+        User.use(Plugin);
 
         var user = new User();
         user.validate();
