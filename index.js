@@ -1,19 +1,15 @@
+var Hoek = require('hoek');
+var Joi = require('joi');
 var Model = require('./lib/model');
-var Schema = require('./lib/schema');
 
 module.exports = function (options) {
 
     options = options || {};
-    var self = this;
-    Schema.validate(options, function (err, schema) {
+    Hoek.assert(typeof options.name === 'string' && options.name.length > 0, 'must provide a name');
+    Hoek.assert(typeof options.schema === 'object', 'must provide a schema');
 
-        if (err) {
-            throw err;
-        }
+    this.name = options.name;
+    this.schema = options.schema.isJoi ? options.schema : Joi.object().keys(options.schema);
 
-        self.name = options.name;
-        self.schema = schema;
-    });
-
-    return Model(self);
+    return Model(this);
 };

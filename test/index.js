@@ -24,7 +24,7 @@ lab.experiment('model', function () {
         expect(function () {
 
             var User = new WOG();
-        }).to.throw('name is required');
+        }).to.throw('must provide a name');
 
         done();
     });
