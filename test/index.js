@@ -188,6 +188,30 @@ lab.experiment('model', function () {
         });
     });
 
+    lab.test('calling validate strips keys which are unknown', function (done) {
+
+        var User = new WOG({
+            name: 'user',
+            schema: {
+                name: Joi.string().required(),
+                favorites: {
+                    number: Joi.number().integer()
+                },
+                age: Joi.number().integer().default(20)
+            }
+        });
+
+        var user = new User({ name: 'test', age: 30, city: 'richland', favorites: { number: 20, color: 'blue' } });
+        user.validate(function (err) {
+
+            expect(user.favorites.number).to.equal(20);
+            expect(user.favorites.color).to.not.exist();
+            expect(user.age).to.equal(30);
+            expect(user.city).to.not.exist();
+            done();
+        });
+    });
+
     lab.test('calling validate reports multiple errors', function (done) {
 
         var User = new WOG({
