@@ -8,8 +8,6 @@ module.exports = function (options) {
     Hoek.assert(typeof options.name === 'string' && options.name.length > 0, 'must provide a name');
     Hoek.assert(typeof options.schema === 'object', 'must provide a schema');
 
-    this.name = options.name;
-    this.schema = options.schema.isJoi ? options.schema : Joi.object().keys(options.schema);
-
-    return Model(this);
+    var schema = options.schema.isJoi ? options.schema : Joi.object().keys(options.schema);
+    return Model(options.name, schema);
 };

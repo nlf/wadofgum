@@ -244,24 +244,32 @@ lab.experiment('model', function () {
 
         var initCalled = false;
 
-        var Plugin = function (collection) {
+        var Plugin = function (model, options) {
 
-            expect(collection).to.exist();
-            expect(collection.name).to.equal('user');
-            expect(collection.schema.isJoi).to.equal(true);
+            expect(model).to.exist();
+            expect(model.type).to.equal('user');
+            expect(model.schema.isJoi).to.equal(true);
             expect(initCalled).to.equal(false);
             initCalled = true;
+
+            model.method({
+                test: function () {
+
+                    return this.name;
+                }
+            });
+
+            model.bind({
+                test: function () {
+
+                    return true;
+                }
+            });
         };
 
-        Plugin.prototype.test = function () {
-            return this.name;
-        };
-
-        Plugin.test = function () {
-            return true;
-        };
-
-        User.use(Plugin);
+        User.register({
+            register: Plugin
+        });
 
         expect(initCalled).to.equal(true);
 
@@ -271,6 +279,30 @@ lab.experiment('model', function () {
 
         expect(User.test).to.exist();
         expect(User.test()).to.equal(true);
+        done();
+    });
+
+    lab.test('can load a plugin with a deep register property', function (done) {
+
+        var User = new WOG({
+            name: 'user',
+            schema: {
+                name: Joi.string().required(),
+                age: Joi.number().integer().default(20)
+            }
+        });
+
+        var Plugin = function (model) {
+
+            expect(model).to.exist();
+        };
+
+        User.register({
+            register: {
+                register: Plugin
+            }
+        });
+
         done();
     });
 
@@ -285,8 +317,8 @@ lab.experiment('model', function () {
         });
 
         expect(function () {
-            User.use();
-        }).to.throw('Plugin must be a constructor method');
+            User.register();
+        }).to.throw('Invalid plugin');
 
         done();
     });
@@ -301,17 +333,17 @@ lab.experiment('model', function () {
             }
         });
 
-        var Plugin = function (collection) {
+        var Plugin = function (model) {
 
-            expect(collection).to.exist();
-            expect(collection.schema).to.exist();
-            expect(collection.schema.isJoi).to.equal(true);
-            collection.schema = collection.schema.concat(Joi.object().keys({
+            expect(model).to.exist();
+            expect(model.schema).to.exist();
+            expect(model.schema.isJoi).to.equal(true);
+            model.schema = model.schema.concat(Joi.object().keys({
                 id: Joi.string().default('some_id')
             }));
         };
 
-        User.use(Plugin);
+        User.register(Plugin);
 
         var user = new User();
         user.validate();
@@ -329,25 +361,86 @@ lab.experiment('model', function () {
             }
         });
 
-        var Plugin = function (collection) {
+        var Plugin = function (model) {
 
-            expect(collection).to.exist();
-            expect(collection.schema.isJoi).to.equal(true);
-            collection.schema = collection.schema.concat(Joi.object().keys({
+            expect(model).to.exist();
+            expect(model.schema.isJoi).to.equal(true);
+            model.schema = model.schema.concat(Joi.object().keys({
                 id: Joi.string().default('some_id')
             }));
+
+            model.on('preValidate', function () {
+
+                this.id = 'other_id';
+            });
         };
 
-        Plugin.prototype.preValidate = function (collection) {
-
-            this.id = 'other_id';
-        };
-
-        User.use(Plugin);
+        User.register(Plugin);
 
         var user = new User();
         user.validate();
         expect(user.id).to.equal('other_id');
+        done();
+    });
+
+    lab.test('can use preValidate twice', function (done) {
+
+        var User = new WOG({
+            name: 'user',
+            schema: {
+                name: Joi.string().required(),
+                age: Joi.number().integer().default(20)
+            }
+        });
+
+        var Plugin = function (model) {
+
+            expect(model).to.exist();
+            expect(model.schema.isJoi).to.equal(true);
+            model.schema = model.schema.concat(Joi.object().keys({
+                id: Joi.string().default('some_id')
+            }));
+
+            model.on('preValidate', function () {
+
+                this.id = 'other_id';
+            });
+
+            model.on('preValidate', function () {
+
+                this.age += 1;
+            });
+        };
+
+        User.register(Plugin);
+
+        var user = new User({ name: 'test', age: 20 });
+        expect(user.age).to.equal(21);
+        expect(user.id).to.equal('other_id');
+        done();
+    });
+
+    lab.test('can bind a non-method value', function (done) {
+
+        var User = new WOG({
+            name: 'user',
+            schema: {
+                name: Joi.string().required(),
+                age: Joi.number().integer().default(20)
+            }
+        });
+
+        var Plugin = function (model) {
+
+            expect(model).to.exist();
+            expect(model.schema.isJoi).to.equal(true);
+            model.bind({
+                test: 'object'
+            });
+        };
+
+        User.register(Plugin);
+        expect(User.test).to.equal('object');
         done();
     });
 });
