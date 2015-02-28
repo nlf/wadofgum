@@ -2,7 +2,7 @@
   "name": "wadofgum",
   "version": "1.0.0-beta3",
   "description": "joi based models",
-  "main": "index.js",
+  "main": "lib/factory.js",
   "scripts": {
     "test": "lab -a code -t 100 -L"
   },

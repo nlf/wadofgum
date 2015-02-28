@@ -1,4 +1,4 @@
-var WOG = require('..');
+var Factory = require('..');
 var Joi = require('joi');
 
 var lab = exports.lab = require('lab').script();
@@ -8,8 +8,8 @@ lab.experiment('model', function () {
 
     lab.test('can create a model definition', function (done) {
 
-        var User = new WOG({
-            name: 'user',
+        var User = new Factory({
+            type: 'user',
             schema: {
                 name: Joi.string().required()
             }
@@ -23,16 +23,16 @@ lab.experiment('model', function () {
 
         expect(function () {
 
-            var User = new WOG();
-        }).to.throw('must provide a name');
+            var User = new Factory();
+        }).to.throw();
 
         done();
     });
 
     lab.test('can create a model instance', function (done) {
 
-        var User = new WOG({
-            name: 'user',
+        var User = new Factory({
+            type: 'user',
             schema: Joi.object().keys({
                 name: Joi.string().required(),
                 age: Joi.number().integer()
@@ -48,8 +48,8 @@ lab.experiment('model', function () {
 
     lab.test('allows updating properties', function (done) {
 
-        var User = new WOG({
-            name: 'user',
+        var User = new Factory({
+            type: 'user',
             schema: {
                 name: Joi.string().required(),
                 age: Joi.number().integer()
@@ -69,8 +69,8 @@ lab.experiment('model', function () {
 
     lab.test('sets default values when not provided at creation', function (done) {
 
-        var User = new WOG({
-            name: 'user',
+        var User = new Factory({
+            type: 'user',
             schema: {
                 name: Joi.string(),
                 age: Joi.number().integer().default(20)
@@ -86,8 +86,8 @@ lab.experiment('model', function () {
 
     lab.test('can validate', function (done) {
 
-        var User = new WOG({
-            name: 'user',
+        var User = new Factory({
+            type: 'user',
             schema: {
                 name: Joi.string().required(),
                 age: Joi.number().integer().default(20)
@@ -106,8 +106,8 @@ lab.experiment('model', function () {
 
     lab.test('calling validate converts values', function (done) {
 
-        var User = new WOG({
-            name: 'user',
+        var User = new Factory({
+            type: 'user',
             schema: {
                 name: Joi.string().required(),
                 age: Joi.number().integer().default(20)
@@ -126,8 +126,8 @@ lab.experiment('model', function () {
 
     lab.test('calling validate reports errors', function (done) {
 
-        var User = new WOG({
-            name: 'user',
+        var User = new Factory({
+            type: 'user',
             schema: {
                 name: Joi.string().required(),
                 age: Joi.number().integer().default(20)
@@ -146,8 +146,8 @@ lab.experiment('model', function () {
 
     lab.test('calling validate converts valid keys to the correct type', function (done) {
 
-        var User = new WOG({
-            name: 'user',
+        var User = new Factory({
+            type: 'user',
             schema: {
                 name: Joi.string().required(),
                 favorites: {
@@ -168,8 +168,8 @@ lab.experiment('model', function () {
 
     lab.test('calling validate does not convert keys which contain errors', function (done) {
 
-        var User = new WOG({
-            name: 'user',
+        var User = new Factory({
+            type: 'user',
             schema: {
                 name: Joi.string().required(),
                 favorites: {
@@ -190,8 +190,8 @@ lab.experiment('model', function () {
 
     lab.test('calling validate strips keys which are unknown', function (done) {
 
-        var User = new WOG({
-            name: 'user',
+        var User = new Factory({
+            type: 'user',
             schema: {
                 name: Joi.string().required(),
                 favorites: {
@@ -214,8 +214,8 @@ lab.experiment('model', function () {
 
     lab.test('calling validate reports multiple errors', function (done) {
 
-        var User = new WOG({
-            name: 'user',
+        var User = new Factory({
+            type: 'user',
             schema: {
                 name: Joi.string().required(),
                 age: Joi.number().integer().default(20)
@@ -234,8 +234,8 @@ lab.experiment('model', function () {
 
     lab.test('can use a plugin', function (done) {
 
-        var User = new WOG({
-            name: 'user',
+        var User = new Factory({
+            type: 'user',
             schema: {
                 name: Joi.string().required(),
                 age: Joi.number().integer().default(20)
@@ -259,7 +259,7 @@ lab.experiment('model', function () {
                 }
             });
 
-            model.bind({
+            model.extend({
                 test: function () {
 
                     return true;
@@ -284,8 +284,8 @@ lab.experiment('model', function () {
 
     lab.test('can load a plugin with a deep register property', function (done) {
 
-        var User = new WOG({
-            name: 'user',
+        var User = new Factory({
+            type: 'user',
             schema: {
                 name: Joi.string().required(),
                 age: Joi.number().integer().default(20)
@@ -308,8 +308,8 @@ lab.experiment('model', function () {
 
     lab.test('throws when trying to use an invalid plugin', function (done) {
 
-        var User = new WOG({
-            name: 'user',
+        var User = new Factory({
+            type: 'user',
             schema: {
                 name: Joi.string().required(),
                 age: Joi.number().integer().default(20)
@@ -325,8 +325,8 @@ lab.experiment('model', function () {
 
     lab.test('can extend a model schema with a plugin', function (done) {
 
-        var User = new WOG({
-            name: 'user',
+        var User = new Factory({
+            type: 'user',
             schema: {
                 name: Joi.string().required(),
                 age: Joi.number().integer().default(20)
@@ -353,8 +353,8 @@ lab.experiment('model', function () {
 
     lab.test('can use preValidate to populate model fields', function (done) {
 
-        var User = new WOG({
-            name: 'user',
+        var User = new Factory({
+            type: 'user',
             schema: {
                 name: Joi.string().required(),
                 age: Joi.number().integer().default(20)
@@ -385,8 +385,8 @@ lab.experiment('model', function () {
 
     lab.test('can use preValidate twice', function (done) {
 
-        var User = new WOG({
-            name: 'user',
+        var User = new Factory({
+            type: 'user',
             schema: {
                 name: Joi.string().required(),
                 age: Joi.number().integer().default(20)
@@ -422,8 +422,8 @@ lab.experiment('model', function () {
 
     lab.test('can bind a non-method value', function (done) {
 
-        var User = new WOG({
-            name: 'user',
+        var User = new Factory({
+            type: 'user',
             schema: {
                 name: Joi.string().required(),
                 age: Joi.number().integer().default(20)
@@ -434,7 +434,7 @@ lab.experiment('model', function () {
 
             expect(model).to.exist();
             expect(model.schema.isJoi).to.equal(true);
-            model.bind({
+            model.extend({
                 test: 'object'
             });
         };
