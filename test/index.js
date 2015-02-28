@@ -369,9 +369,9 @@ lab.experiment('model', function () {
                 id: Joi.string().default('some_id')
             }));
 
-            model.on('preValidate', function () {
+            model.on('preValidate', function (model) {
 
-                this.id = 'other_id';
+                model.id = 'other_id';
             });
         };
 
@@ -401,14 +401,14 @@ lab.experiment('model', function () {
                 id: Joi.string().default('some_id')
             }));
 
-            model.on('preValidate', function () {
+            model.on('preValidate', function (model) {
 
-                this.id = 'other_id';
+                model.id = 'other_id';
             });
 
-            model.on('preValidate', function () {
+            model.on('preValidate', function (model) {
 
-                this.age += 1;
+                model.age += 1;
             });
         };
 
