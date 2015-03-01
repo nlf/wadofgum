@@ -317,8 +317,29 @@ lab.experiment('model', function () {
         });
 
         expect(function () {
-            User.register();
+            User.register({});
         }).to.throw('Invalid plugin');
+
+        expect(function () {
+            User.register('broken');
+        }).to.throw('Invalid plugin');
+
+        done();
+    });
+
+    lab.test('does nothing when calling extend with no parameters', function (done) {
+
+        var User = new Factory({
+            type: 'user',
+            schema: {
+                name: Joi.string().required(),
+                age: Joi.number().integer().default(20)
+            }
+        });
+
+        expect(function () {
+            User.register();
+        }).to.not.throw();
 
         done();
     });
