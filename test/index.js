@@ -388,7 +388,7 @@ lab.test('can use preValidate to populate model fields', function (done) {
             id: Joi.string().default('some_id')
         }));
 
-        model.on('preValidate', function (model) {
+        model.listen('preValidate', function (model) {
 
             model.id = 'other_id';
         });
@@ -420,12 +420,12 @@ lab.test('can use preValidate twice', function (done) {
             id: Joi.string().default('some_id')
         }));
 
-        model.on('preValidate', function (model) {
+        model.listen('preValidate', function (model) {
 
             model.id = 'other_id';
         });
 
-        model.on('preValidate', function (model) {
+        model.listen('preValidate', function (model) {
 
             model.age += 1;
         });
@@ -437,6 +437,64 @@ lab.test('can use preValidate twice', function (done) {
     expect(user.age).to.equal(21);
     expect(user.id).to.equal('other_id');
     done();
+});
+
+lab.test('uses separate event emitters for different instances', function (done) {
+
+    var User = new Factory({
+        type: 'user',
+        schema: {
+            id: Joi.number().integer(),
+            name: Joi.string().required(),
+            age: Joi.number().integer().default(20)
+        }
+    });
+
+    var Plugin = function (model) {
+
+        expect(model).to.exist();
+        expect(model.schema.isJoi).to.equal(true);
+        model.listen('preValidate', function (model) {
+
+            ++model.id;
+        });
+    };
+
+    User.register(Plugin);
+
+    var user = new User({ id: 1 });
+    var user2 = new User({ id: 5 });
+
+    expect(user.id).to.equal(2);
+    expect(user2.id).to.equal(6);
+    done();
+});
+
+lab.test('fires the create event when instantiating a model', function (done) {
+
+    var User = new Factory({
+        type: 'user',
+        schema: {
+            name: Joi.string().required(),
+            age: Joi.number().integer().default(20)
+        }
+    });
+
+    var Plugin = function (model) {
+
+        expect(model).to.exist();
+        expect(model.schema.isJoi).to.equal(true);
+        model.on('create', function (model) {
+
+            expect(model.name).to.equal('test');
+            expect(model.age).to.equal(20);
+            done();
+        });
+    };
+
+    User.register(Plugin);
+
+    var user = new User({ name: 'test', age: 20 });
 });
 
 lab.test('can bind a non-method value', function (done) {
