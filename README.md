@@ -126,7 +126,11 @@ user.test(); // true
 
 The model factory and model instances each have event emitters. To add a listener for factory events, you may simply use `User.on(event, fn)`. Events can also be emitted on a model factory by calling `User.emit(event, params)`.
 
+Model factories, by default, only emit one event `create`. The parameter passed to this event is the model instance that was just created.
+
 To add a listener for model instance events, you may either use `user.on(event, fn)` where `user` is an instance of a model, or you may use `User.listen(event, fn)` where `User` is a model factory.
+
+Model instances, by default, emit two events `preValidate` and `postValidate`. The parameter passed to both is a reference to the model instance.
 
 Events can only be emitted on a model instance if you have a reference to that instance, in which case you may simply use `user.emit(event, params)`.
 
