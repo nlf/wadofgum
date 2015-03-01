@@ -1,6 +1,6 @@
 ## wadofgum
 
-A super minimal modeling library built around [https://github.com/hapijs/joi](joi).
+A super minimal modeling library built around [joi](https://github.com/hapijs/joi).
 
 Joi is used for all schema definition and validation, all this library provides is a way of using predefined schemas in a prototypical manner as well as means of simply extending these prototypes.
 
