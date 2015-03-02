@@ -1,6 +1,6 @@
 {
   "name": "wadofgum",
-  "version": "1.0.0-beta3",
+  "version": "1.0.0-beta4",
   "description": "joi based models",
   "main": "lib/factory.js",
   "scripts": {
