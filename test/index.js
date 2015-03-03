@@ -388,7 +388,7 @@ lab.test('can use preValidate to populate model fields', function (done) {
             id: Joi.string().default('some_id')
         }));
 
-        model.listen('preValidate', function (model) {
+        model.prototype.on('preValidate', function (model) {
 
             model.id = 'other_id';
         });
@@ -420,12 +420,12 @@ lab.test('can use preValidate twice', function (done) {
             id: Joi.string().default('some_id')
         }));
 
-        model.listen('preValidate', function (model) {
+        model.prototype.on('preValidate', function (model) {
 
             model.id = 'other_id';
         });
 
-        model.listen('preValidate', function (model) {
+        model.prototype.on('preValidate', function (model) {
 
             model.age += 1;
         });
@@ -454,7 +454,7 @@ lab.test('uses separate event emitters for different instances', function (done)
 
         expect(model).to.exist();
         expect(model.schema.isJoi).to.equal(true);
-        model.listen('preValidate', function (model) {
+        model.prototype.on('preValidate', function (model) {
 
             ++model.id;
         });
