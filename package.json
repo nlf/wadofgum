@@ -27,6 +27,6 @@
   },
   "dependencies": {},
   "peerDependencies": {
-    "joi": "^6.0.0"
+    "joi": ">= 4.6.0"
   }
 }
