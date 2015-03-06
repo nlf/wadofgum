@@ -136,7 +136,7 @@ lab.test('calling validate reports errors', function (done) {
     user.validate(function (err) {
 
         expect(err).to.exist();
-        expect(err.message).to.equal('name is required');
+        expect(err.message).to.contain('"name" is required');
         expect(user.age).to.equal(30);
         done();
     });
@@ -200,7 +200,8 @@ lab.test('calling validate reports multiple errors', function (done) {
     user.validate(function (err) {
 
         expect(err).to.exist();
-        expect(err.message).to.equal('name is required. age must be a number');
+        expect(err.message).to.contain('"name" is required');
+        expect(err.message).to.contain('"age" must be a number');
         expect(user.age).to.equal('test');
         done();
     });
