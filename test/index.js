@@ -250,7 +250,7 @@ lab.test('can use a plugin', function (done) {
         expect(initCalled).to.equal(false);
         initCalled = true;
 
-        model.method({
+        model.prototype.extend({
             test: function () {
 
                 return this.name;

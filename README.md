@@ -85,7 +85,7 @@ User.register({
 
 #### `extend(obj)`
 
-The `extend` method associates parameters and methods directly with the factory:
+The `extend` method is available on both the factory, and the factory's prototype. This method is used to attach additional variables or methods to either of those locations.
 
 ```javascript
 var Plugin = function (factory, options) {
@@ -102,13 +102,9 @@ User.test(); // true
 User.hasPlugin; // true
 ```
 
-#### `method(obj)`
-
-The `method` method is used to attach methods to the factory's prototype, which yields instance methods:
-
 ```javascript
 var Plugin = function (factory, options) {
-    factory.method({
+    factory.prototype.extend({
         test: function () {
             return true;
         }
