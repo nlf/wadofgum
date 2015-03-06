@@ -257,7 +257,7 @@ lab.test('can use a plugin', function (done) {
     done();
 });
 
-lab.test('can load multiple plugins at once using both arrays and single objects', function (done) {
+lab.test('can load multiple plugins at once', function (done) {
 
     var User = new Factory({
         type: 'user',
@@ -284,7 +284,7 @@ lab.test('can load multiple plugins at once using both arrays and single objects
         });
     };
 
-    User.register(Plugin, [PluginTwo]);
+    User.register([Plugin, PluginTwo]);
     expect(User.test()).to.equal(true);
     expect(User.twice).to.equal(true);
     done();
