@@ -1,6 +1,6 @@
 {
   "name": "wadofgum",
-  "version": "1.0.0-beta4",
+  "version": "1.0.0",
   "description": "joi based models",
   "main": "index.js",
   "scripts": {
@@ -25,9 +25,7 @@
     "lab": "^5.4.0",
     "joi": "^6.0.0"
   },
-  "dependencies": {
-    "hoek": "^2.11.0"
-  },
+  "dependencies": {},
   "peerDependencies": {
     "joi": "^6.0.0"
   }

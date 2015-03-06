@@ -257,6 +257,39 @@ lab.test('can use a plugin', function (done) {
     done();
 });
 
+lab.test('can load multiple plugins at once using both arrays and single objects', function (done) {
+
+    var User = new Factory({
+        type: 'user',
+        schema: {
+            name: Joi.string().required(),
+            age: Joi.number().integer().default(20)
+        }
+    });
+
+    var Plugin = function (model, options) {
+
+        model.extend({
+            test: function () {
+
+                return true;
+            }
+        });
+    };
+
+    var PluginTwo = function (model, options) {
+
+        model.extend({
+            twice: true
+        });
+    };
+
+    User.register(Plugin, [PluginTwo]);
+    expect(User.test()).to.equal(true);
+    expect(User.twice).to.equal(true);
+    done();
+});
+
 lab.test('can load a plugin with a deep register property', function (done) {
 
     var User = new Factory({
