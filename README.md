@@ -118,6 +118,22 @@ var user = new User();
 user.test(); // true
 ```
 
+#### `extendSchema(schema)`
+
+It is also possible to extend a given factory's schema using the `extendSchema()` method. This simply proxies the given argument to joi's `concat` method, merging the existing schema with the given schema:
+
+```javascript
+var Plugin = function (factory, options) {
+    factory.extendSchema(Joi.object().keys({
+        id: Joi.string().default('some_id')
+    }));
+};
+
+User.register(Plugin);
+var user = new User();
+user.id === 'some_id'; // true
+```
+
 #### events
 
 The model factory and model instances each have event emitters. To add a listener for factory events, you may simply use `User.on(event, fn)`. Events can also be emitted on a model factory by calling `User.emit(event, params)`.

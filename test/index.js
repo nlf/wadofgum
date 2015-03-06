@@ -357,7 +357,7 @@ lab.test('can extend a model schema with a plugin', function (done) {
         expect(model).to.exist();
         expect(model.schema).to.exist();
         expect(model.schema.isJoi).to.equal(true);
-        model.schema = model.schema.concat(Joi.object().keys({
+        model.extendSchema(Joi.object().keys({
             id: Joi.string().default('some_id')
         }));
     };
