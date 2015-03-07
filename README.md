@@ -1,4 +1,4 @@
-## wadofgum
+## wadofgum [![Build Status](https://travis-ci.org/nlf/wadofgum.svg)](https://travis-ci.org/nlf/wadofgum)
 
 A super minimal modeling library built around [joi](https://github.com/hapijs/joi).
 
