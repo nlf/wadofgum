@@ -136,7 +136,9 @@ user.id === 'some_id'; // true
 
 #### events
 
-The model factory and model instances each have event emitters. To add a listener for factory events, you may simply use `User.on(event, fn)`. Events can also be emitted on a model factory by calling `User.emit(event, params)`.
+The model factory and model instances each have event emitters. These event emitters are provided by [spit](https://github.com/nlf/spit) and are asynchronous. See the README in that repo for more details.
+
+To add a listener for factory events, you may simply use `User.on(event, fn)`. Events can also be emitted on a model factory by calling `User.emit(event, params)`.
 
 Model factories, by default, only emit one event `create`. The parameter passed to this event is the model instance that was just created.
 

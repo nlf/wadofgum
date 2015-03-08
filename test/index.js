@@ -380,6 +380,62 @@ lab.test('can extend a model schema with a plugin', function (done) {
     done();
 });
 
+lab.test('can abort validation by returning an error in preValidate', function (done) {
+
+    var User = new Factory({
+        type: 'user',
+        schema: {
+            name: Joi.string().required(),
+            age: Joi.number().integer().default(20)
+        }
+    });
+
+    var called = false;
+    User.prototype.on('preValidate', function (user, next) {
+
+        next(new Error('failed'));
+    });
+
+    User.prototype.on('preValidate', function (user, next) {
+
+        called = true;
+        next();
+    });
+
+    var user = new User();
+    user.validate(function (err) {
+
+        expect(err).to.exist();
+        expect(err.message).to.equal('failed');
+        expect(called).to.equal(false);
+        done();
+    });
+});
+
+lab.test('can pass through an error from postValidate', function (done) {
+
+    var User = new Factory({
+        type: 'user',
+        schema: {
+            name: Joi.string().required(),
+            age: Joi.number().integer().default(20)
+        }
+    });
+
+    User.prototype.on('postValidate', function (user, next) {
+
+        next(new Error('failed'));
+    });
+
+    var user = new User();
+    user.validate(function (err) {
+
+        expect(err).to.exist();
+        expect(err.message).to.equal('failed');
+        done();
+    });
+});
+
 lab.test('can use preValidate to populate model fields', function (done) {
 
     var User = new Factory({
@@ -398,9 +454,10 @@ lab.test('can use preValidate to populate model fields', function (done) {
             id: Joi.string().default('some_id')
         }));
 
-        model.prototype.on('preValidate', function (model) {
+        model.prototype.on('preValidate', function (model, next) {
 
             model.id = 'other_id';
+            next();
         });
     };
 
@@ -430,14 +487,16 @@ lab.test('can use preValidate twice', function (done) {
             id: Joi.string().default('some_id')
         }));
 
-        model.prototype.on('preValidate', function (model) {
+        model.prototype.on('preValidate', function (model, next) {
 
             model.id = 'other_id';
+            next();
         });
 
-        model.prototype.on('preValidate', function (model) {
+        model.prototype.on('preValidate', function (model, next) {
 
             model.age += 1;
+            next();
         });
     };
 
@@ -464,9 +523,10 @@ lab.test('uses separate event emitters for different instances', function (done)
 
         expect(model).to.exist();
         expect(model.schema.isJoi).to.equal(true);
-        model.prototype.on('preValidate', function (model) {
+        model.prototype.on('preValidate', function (model, next) {
 
             ++model.id;
+            next();
         });
     };
 
@@ -494,10 +554,12 @@ lab.test('fires the create event when instantiating a model', function (done) {
 
         expect(model).to.exist();
         expect(model.schema.isJoi).to.equal(true);
-        model.on('create', function (model) {
+        model.on('create', function (model, next) {
 
             expect(model.name).to.equal('test');
             expect(model.age).to.equal(20);
+            next();
+
             done();
         });
     };
