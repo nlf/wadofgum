@@ -17,11 +17,31 @@ lab.test('can create a model definition', function (done) {
     done();
 });
 
-lab.test('throws when no name is supplied', function (done) {
+lab.test('throws when bad options are supplied', function (done) {
 
     expect(function () {
 
         var User = new Factory();
+    }).to.throw();
+
+    expect(function () {
+
+        var User = new Factory({});
+    }).to.throw();
+
+    expect(function () {
+
+        var User = new Factory({ type: 'test' });
+    }).to.throw();
+
+    expect(function () {
+
+        var User = new Factory({ schema: {} });
+    }).to.throw();
+
+    expect(function () {
+
+        var User = new Factory({ plugins: [] });
     }).to.throw();
 
     done();
@@ -589,6 +609,27 @@ lab.test('can bind a non-method value', function (done) {
     };
 
     User.register(Plugin);
+    expect(User.test).to.equal('object');
+    done();
+});
+
+lab.test('can load plugins during instantiation', function (done) {
+
+    var Plugin = function (model) {
+
+        model.extend({ test: 'object' });
+    };
+
+    var User = new Factory({
+        type: 'user',
+        schema: {
+            name: Joi.string()
+        },
+        plugins: [Plugin]
+    });
+
+    var user = new User({ name: 'test' });
+    expect(user.name).to.equal('test');
     expect(User.test).to.equal('object');
     done();
 });

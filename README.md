@@ -34,6 +34,20 @@ var User = new Factory({
 });
 ```
 
+Also supported is an optional `plugins` key, which can be used to load plugins on the factory at creation time.
+
+```javascript
+var User = new Factory({
+    type: 'user',
+    schema: {
+        id: Joi.number(),
+        firstName: Joi.string(),
+        lastName: Joi.string()
+    },
+    plugins: [PluginOne, PluginTwo]
+});
+```
+
 This factory can then be used to create model instances. These instances are validated on creation which allows joi to perform type coercion immediately. Errors in the initial validation are simply ignored.
 
 ```javascript
