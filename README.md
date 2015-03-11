@@ -102,34 +102,56 @@ User.register({
 The `extend` method is available on both the factory, and the factory's prototype. This method is used to attach additional variables or methods to either of those locations.
 
 ```javascript
-var Plugin = function (factory, options) {
-    factory.extend({
-        hasPlugin: true,
-        test: function () {
-            return true;
-        }
-    });
-};
+User.extend({
+    hasPlugin: true,
+    test: function () {
+        return true;
+    }
+});
 
-User.register(Plugin);
 User.test(); // true
 User.hasPlugin; // true
 ```
 
 ```javascript
-var Plugin = function (factory, options) {
-    factory.prototype.extend({
-        test: function () {
-            return true;
-        }
-    });
-};
+User.prototype.extend({
+    test: function () {
+        return true;
+    }
+});
 
-User.register(Plugin);
 User.test(); // undefined is not a function
-
 var user = new User();
 user.test(); // true
+```
+
+Note: with the `extend` method, you may also pass a factory. This will merge the old factory's schema with your current factory's schema (via joi's [concat method](https://github.com/hapijs/joi/#anyconcatschema), copy any properties that were added by the `extend` methods on the old factory, and re-register any plugins that were loaded on the new factory.
+
+```javascript
+var Plugin = function (model) {
+    model.extend({ hasPlugin: true });
+};
+
+var Base = new Factory({
+    type: 'base',
+    schema: {
+        id: Joi.string().default('some_id')
+    },
+    plugins: [Plugin]
+});
+
+var User = new Factory({
+    type: 'user',
+    schema: {
+        name: Joi.string()
+    }
+});
+
+User.extend(Base);
+User.hasPlugin === true; // true
+var user = new User({ name: 'test' });
+user.name === 'test'; // true
+user.id === 'some_id'; // true
 ```
 
 #### `extendSchema(schema)`

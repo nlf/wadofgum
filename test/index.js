@@ -400,6 +400,68 @@ lab.test('can extend a model schema with a plugin', function (done) {
     done();
 });
 
+lab.test('can load plugins during instantiation', function (done) {
+
+    var Plugin = function (model) {
+
+        model.extend({ test: 'object' });
+    };
+
+    var User = new Factory({
+        type: 'user',
+        schema: {
+            name: Joi.string()
+        },
+        plugins: [Plugin]
+    });
+
+    var user = new User({ name: 'test' });
+    expect(user.name).to.equal('test');
+    expect(User.test).to.equal('object');
+    done();
+});
+
+lab.test('can extend a model with another model', function (done) {
+
+    var execCount = 0;
+
+    var Plugin = function (model) {
+
+        model.extend({ test: 'object' });
+        ++execCount;
+    };
+
+    var Base = new Factory({
+        type: 'base',
+        schema: {},
+        plugins: [Plugin]
+    });
+
+    expect(execCount).to.equal(1);
+
+    var User = new Factory({
+        type: 'user',
+        schema: {
+            name: Joi.string()
+        }
+    });
+
+    User.extend(Base);
+    expect(execCount).to.equal(2);
+    expect(User.type).to.equal('user');
+    expect(User.test).to.equal('object');
+    expect(User.schema.describe()).to.deep.equal({
+        type: 'object',
+        children: {
+            name: {
+                type: 'string',
+                invalids: ['']
+            }
+        }
+    });
+    done();
+});
+
 lab.test('can abort validation by returning an error in preValidate', function (done) {
 
     var User = new Factory({
@@ -609,27 +671,6 @@ lab.test('can bind a non-method value', function (done) {
     };
 
     User.register(Plugin);
-    expect(User.test).to.equal('object');
-    done();
-});
-
-lab.test('can load plugins during instantiation', function (done) {
-
-    var Plugin = function (model) {
-
-        model.extend({ test: 'object' });
-    };
-
-    var User = new Factory({
-        type: 'user',
-        schema: {
-            name: Joi.string()
-        },
-        plugins: [Plugin]
-    });
-
-    var user = new User({ name: 'test' });
-    expect(user.name).to.equal('test');
     expect(User.test).to.equal('object');
     done();
 });
