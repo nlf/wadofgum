@@ -29,6 +29,6 @@
     "spit": "^1.0.0"
   },
   "peerDependencies": {
-    "joi": ">= 4.6.0"
+    "joi": ">= 6.0.0"
   }
 }
