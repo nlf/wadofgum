@@ -71,6 +71,36 @@ var user = new User();
 user.factory === User; // true
 ```
 
+To attach methods to the factory, simply assign them.
+
+```javascript
+User.find = function (query, callback) {
+};
+```
+
+To attach methods to a model instance, assign them to the factory's prototype.
+
+```javascript
+User.prototype.save = function (callback) {
+};
+```
+
+Note that later assignments to the factory's `schema` property will pass through a setter method that will concat the new schema with the existing one, as in:
+
+```javascript
+var User = new Factory({
+    type: 'user',
+    schema: {
+        name: Joi.string(),
+        age: Joi.number().integer()
+    }
+});
+
+User.schema = Joi.object({ favoriteColor: Joi.string() });
+User.schema = { luckyNumber: Joi.number().integer() };
+// User.schema will now have keys for 'name', 'age', 'favoriteColor', and 'luckyNumber'
+```
+
 #### `validate([next])`
 
 Validation can also be triggered manually, by calling the `validate()` method on a model instance. This method accepts a callback that will receive any errors. Note that validating a model mutates properties in the same way as when instantiating a new model.
@@ -99,75 +129,18 @@ User.register({
 
 #### `extend(obj)`
 
-The `extend` method is available on both the factory, and the factory's prototype. This method is used to attach additional variables or methods to either of those locations.
+The `extend` method is used to extend the current factory with another factory. This is useful for creating a base factory that contains common plugins for your other factories to inherit. The schema from the two factories will also be merged.
 
 ```javascript
-User.extend({
-    hasPlugin: true,
-    test: function () {
-        return true;
-    }
-});
-
-User.test(); // true
-User.hasPlugin; // true
-```
-
-```javascript
-User.prototype.extend({
-    test: function () {
-        return true;
-    }
-});
-
-User.test(); // undefined is not a function
-var user = new User();
-user.test(); // true
-```
-
-Note: with the `extend` method, you may also pass a factory. This will merge the old factory's schema with your current factory's schema (via joi's [concat method](https://github.com/hapijs/joi/#anyconcatschema), copy any properties that were added by the `extend` methods on the old factory, and re-register any plugins that were loaded on the new factory.
-
-```javascript
-var Plugin = function (model) {
-    model.extend({ hasPlugin: true });
-};
-
 var Base = new Factory({
-    type: 'base',
+    type: '_base',
     schema: {
-        id: Joi.string().default('some_id')
+        id: Joi.string()
     },
-    plugins: [Plugin]
+    plugins: [SomePlugin, AnotherPlugin]
 });
 
-var User = new Factory({
-    type: 'user',
-    schema: {
-        name: Joi.string()
-    }
-});
-
-User.extend(Base);
-User.hasPlugin === true; // true
-var user = new User({ name: 'test' });
-user.name === 'test'; // true
-user.id === 'some_id'; // true
-```
-
-#### `extendSchema(schema)`
-
-It is also possible to extend a given factory's schema using the `extendSchema()` method. This simply proxies the given argument to joi's `concat` method, merging the existing schema with the given schema:
-
-```javascript
-var Plugin = function (factory, options) {
-    factory.extendSchema(Joi.object().keys({
-        id: Joi.string().default('some_id')
-    }));
-};
-
-User.register(Plugin);
-var user = new User();
-user.id === 'some_id'; // true
+User.extend(Base); // User will now have SomePlugin and AnotherPlugin loaded, as well as an 'id' key available in the schema
 ```
 
 #### events

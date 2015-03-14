@@ -545,6 +545,8 @@ lab.test('can use preValidate to populate model fields', function (done) {
             id: Joi.string().default('some_id')
         });
 
+        model.schema = { admin: Joi.boolean().default(false) };
+
         model.prototype.on('preValidate', function (model, next) {
 
             model.id = 'other_id';
@@ -557,6 +559,7 @@ lab.test('can use preValidate to populate model fields', function (done) {
     var user = new User();
     user.validate();
     expect(user.id).to.equal('other_id');
+    expect(user.admin).to.equal(false);
     done();
 });
 
