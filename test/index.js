@@ -247,19 +247,15 @@ lab.test('can use a plugin', function (done) {
         expect(initCalled).to.equal(false);
         initCalled = true;
 
-        model.prototype.extend({
-            test: function () {
+        model.prototype.test = function () {
 
-                return this.name;
-            }
-        });
+            return this.name;
+        };
 
-        model.extend({
-            test: function () {
+        model.test = function () {
 
-                return true;
-            }
-        });
+            return true;
+        };
     };
 
     User.register({
@@ -289,19 +285,15 @@ lab.test('can load multiple plugins at once', function (done) {
 
     var Plugin = function (model, options) {
 
-        model.extend({
-            test: function () {
+        model.test = function () {
 
-                return true;
-            }
-        });
+            return true;
+        };
     };
 
     var PluginTwo = function (model, options) {
 
-        model.extend({
-            twice: true
-        });
+        model.twice = true;
     };
 
     User.register([Plugin, PluginTwo]);
@@ -355,23 +347,6 @@ lab.test('throws when trying to use an invalid plugin', function (done) {
     done();
 });
 
-lab.test('does nothing when calling extend with no parameters', function (done) {
-
-    var User = new Factory({
-        type: 'user',
-        schema: {
-            name: Joi.string().required(),
-            age: Joi.number().integer().default(20)
-        }
-    });
-
-    expect(function () {
-        User.register();
-    }).to.not.throw();
-
-    done();
-});
-
 lab.test('can extend a model schema with a plugin', function (done) {
 
     var User = new Factory({
@@ -387,9 +362,10 @@ lab.test('can extend a model schema with a plugin', function (done) {
         expect(model).to.exist();
         expect(model.schema).to.exist();
         expect(model.schema.isJoi).to.equal(true);
-        model.extendSchema(Joi.object().keys({
+
+        model.schema = Joi.object({
             id: Joi.string().default('some_id')
-        }));
+        });
     };
 
     User.register(Plugin);
@@ -404,7 +380,7 @@ lab.test('can load plugins during instantiation', function (done) {
 
     var Plugin = function (model) {
 
-        model.extend({ test: 'object' });
+        model.test = 'object';
     };
 
     var User = new Factory({
@@ -427,13 +403,15 @@ lab.test('can extend a model with another model', function (done) {
 
     var Plugin = function (model) {
 
-        model.extend({ test: 'object' });
+        model.test = 'object';
         ++execCount;
     };
 
     var Base = new Factory({
         type: 'base',
-        schema: {},
+        schema: {
+            id: Joi.string()
+        },
         plugins: [Plugin]
     });
 
@@ -456,9 +434,40 @@ lab.test('can extend a model with another model', function (done) {
             name: {
                 type: 'string',
                 invalids: ['']
+            },
+            id: {
+                type: 'string',
+                invalids: ['']
             }
         }
     });
+    done();
+});
+
+lab.test('throws an error when attempting to extend a factory with an invalid factory', function (done) {
+
+    var User = new Factory({
+        type: 'user',
+        schema: {
+            name: Joi.string()
+        }
+    });
+
+    expect(function () {
+
+        User.extend();
+    }).to.throw('Invalid factory');
+
+    expect(function () {
+
+        User.extend({});
+    }).to.throw('Invalid factory');
+
+    expect(function () {
+
+        User.extend(function () {});
+    }).to.throw('Invalid factory');
+
     done();
 });
 
@@ -532,9 +541,9 @@ lab.test('can use preValidate to populate model fields', function (done) {
 
         expect(model).to.exist();
         expect(model.schema.isJoi).to.equal(true);
-        model.schema = model.schema.concat(Joi.object().keys({
+        model.schema = Joi.object().keys({
             id: Joi.string().default('some_id')
-        }));
+        });
 
         model.prototype.on('preValidate', function (model, next) {
 
@@ -565,9 +574,9 @@ lab.test('can use preValidate twice', function (done) {
 
         expect(model).to.exist();
         expect(model.schema.isJoi).to.equal(true);
-        model.schema = model.schema.concat(Joi.object().keys({
+        model.schema = Joi.object().keys({
             id: Joi.string().default('some_id')
-        }));
+        });
 
         model.prototype.on('preValidate', function (model, next) {
 
@@ -649,28 +658,4 @@ lab.test('fires the create event when instantiating a model', function (done) {
     User.register(Plugin);
 
     var user = new User({ name: 'test', age: 20 });
-});
-
-lab.test('can bind a non-method value', function (done) {
-
-    var User = new Factory({
-        type: 'user',
-        schema: {
-            name: Joi.string().required(),
-            age: Joi.number().integer().default(20)
-        }
-    });
-
-    var Plugin = function (model) {
-
-        expect(model).to.exist();
-        expect(model.schema.isJoi).to.equal(true);
-        model.extend({
-            test: 'object'
-        });
-    };
-
-    User.register(Plugin);
-    expect(User.test).to.equal('object');
-    done();
 });
