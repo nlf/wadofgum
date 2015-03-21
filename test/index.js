@@ -60,32 +60,11 @@ lab.test('can create a model instance', function (done) {
     var user = new User({ name: 'test', age: '30' });
     expect(user).to.exist();
     expect(user.name).to.equal('test');
-    expect(user.age).to.equal(30);
+    expect(user.age).to.equal('30');
     done();
 });
 
-lab.test('allows updating properties', function (done) {
-
-    var User = new Factory({
-        type: 'user',
-        schema: {
-            name: Joi.string().required(),
-            age: Joi.number().integer()
-        }
-    });
-
-    var user = new User({ name: 'test', age: '30' });
-    expect(user).to.exist();
-    expect(user.name).to.equal('test');
-    expect(user.age).to.equal(30);
-
-    user.age = 40;
-    expect(user.age).to.equal(40);
-
-    done();
-});
-
-lab.test('sets default values when not provided at creation', function (done) {
+lab.test('sets default values after validating', function (done) {
 
     var User = new Factory({
         type: 'user',
@@ -96,10 +75,13 @@ lab.test('sets default values when not provided at creation', function (done) {
     });
 
     var user = new User();
-    expect(user).to.exist();
-    expect(user.age).to.equal(20);
+    user.validate().then(function () {
 
-    done();
+        expect(user).to.exist();
+        expect(user.age).to.equal(20);
+
+        done();
+    });
 });
 
 lab.test('can validate', function (done) {
@@ -113,9 +95,8 @@ lab.test('can validate', function (done) {
     });
 
     var user = new User({ name: 'test', age: 30 });
-    user.validate(function (err) {
+    user.validate().then(function () {
 
-        expect(err).to.not.exist();
         expect(user.name).to.equal('test');
         expect(user.age).to.equal(30);
         done();
@@ -133,9 +114,8 @@ lab.test('calling validate converts values', function (done) {
     });
 
     var user = new User({ name: 'test', age: '30' });
-    user.validate(function (err) {
+    user.validate().then(function () {
 
-        expect(err).to.not.exist();
         expect(user.name).to.equal('test');
         expect(user.age).to.equal(30);
         done();
@@ -153,7 +133,7 @@ lab.test('calling validate reports errors', function (done) {
     });
 
     var user = new User({ age: '30' });
-    user.validate(function (err) {
+    user.validate().catch(function (err) {
 
         expect(err).to.exist();
         expect(err.message).to.contain('"name" is required');
@@ -176,7 +156,7 @@ lab.test('calling validate converts valid keys to the correct type', function (d
     });
 
     var user = new User({ name: 'test', age: '30', favorites: { number: '20' } });
-    user.validate(function (err) {
+    user.validate().then(function () {
 
         expect(user.age).to.equal(30);
         expect(user.favorites.number).to.equal(20);
@@ -198,7 +178,7 @@ lab.test('calling validate does not convert keys which contain errors', function
     });
 
     var user = new User({ name: 'test', age: 'test', favorites: { number: 'twenty' } });
-    user.validate(function (err) {
+    user.validate().catch(function () {
 
         expect(user.favorites.number).to.equal('twenty');
         expect(user.age).to.equal('test');
@@ -217,7 +197,7 @@ lab.test('calling validate reports multiple errors', function (done) {
     });
 
     var user = new User({ age: 'test' });
-    user.validate(function (err) {
+    user.validate().catch(function (err) {
 
         expect(err).to.exist();
         expect(err.message).to.contain('"name" is required');
@@ -370,10 +350,12 @@ lab.test('can extend a model schema with a plugin', function (done) {
 
     User.register(Plugin);
 
-    var user = new User();
-    user.validate();
-    expect(user.id).to.equal('some_id');
-    done();
+    var user = new User({ name: 'test' });
+    user.validate().then(function () {
+
+        expect(user.id).to.equal('some_id');
+        done();
+    });
 });
 
 lab.test('can load plugins during instantiation', function (done) {
@@ -482,22 +464,22 @@ lab.test('can abort validation by returning an error in preValidate', function (
     });
 
     var called = false;
-    User.prototype.on('preValidate', function (user, next) {
+    User.prototype.on('preValidate', function (user) {
 
-        next(new Error('failed'));
+        return Promise.reject(new Error('failed'));
     });
 
-    User.prototype.on('preValidate', function (user, next) {
+    User.prototype.on('preValidate', function (user) {
 
         called = true;
-        next();
     });
 
-    var user = new User();
-    user.validate(function (err) {
+    var user = new User({ name: 'test' });
+    user.validate().catch(function (err) {
 
         expect(err).to.exist();
         expect(err.message).to.equal('failed');
+        expect(user.age).to.not.exist();
         expect(called).to.equal(false);
         done();
     });
@@ -513,13 +495,13 @@ lab.test('can pass through an error from postValidate', function (done) {
         }
     });
 
-    User.prototype.on('postValidate', function (user, next) {
+    User.prototype.on('postValidate', function (user) {
 
-        next(new Error('failed'));
+        return Promise.reject(new Error('failed'));
     });
 
-    var user = new User();
-    user.validate(function (err) {
+    var user = new User({ name: 'test' });
+    user.validate().catch(function (err) {
 
         expect(err).to.exist();
         expect(err.message).to.equal('failed');
@@ -547,20 +529,21 @@ lab.test('can use preValidate to populate model fields', function (done) {
 
         model.schema = { admin: Joi.boolean().default(false) };
 
-        model.prototype.on('preValidate', function (model, next) {
+        model.prototype.on('preValidate', function (model) {
 
             model.id = 'other_id';
-            next();
         });
     };
 
     User.register(Plugin);
 
-    var user = new User();
-    user.validate();
-    expect(user.id).to.equal('other_id');
-    expect(user.admin).to.equal(false);
-    done();
+    var user = new User({ name: 'test' });
+    user.validate().then(function () {
+
+        expect(user.id).to.equal('other_id');
+        expect(user.admin).to.equal(false);
+        done();
+    });
 });
 
 lab.test('can use preValidate twice', function (done) {
@@ -581,25 +564,26 @@ lab.test('can use preValidate twice', function (done) {
             id: Joi.string().default('some_id')
         });
 
-        model.prototype.on('preValidate', function (model, next) {
+        model.prototype.on('preValidate', function (model) {
 
             model.id = 'other_id';
-            next();
         });
 
-        model.prototype.on('preValidate', function (model, next) {
+        model.prototype.on('preValidate', function (model) {
 
             model.age += 1;
-            next();
         });
     };
 
     User.register(Plugin);
 
     var user = new User({ name: 'test', age: 20 });
-    expect(user.age).to.equal(21);
-    expect(user.id).to.equal('other_id');
-    done();
+    user.validate().then(function () {
+
+        expect(user.age).to.equal(21);
+        expect(user.id).to.equal('other_id');
+        done();
+    });
 });
 
 lab.test('uses separate event emitters for different instances', function (done) {
@@ -617,21 +601,26 @@ lab.test('uses separate event emitters for different instances', function (done)
 
         expect(model).to.exist();
         expect(model.schema.isJoi).to.equal(true);
-        model.prototype.on('preValidate', function (model, next) {
+        model.prototype.on('preValidate', function (model) {
 
             ++model.id;
-            next();
         });
     };
 
     User.register(Plugin);
 
-    var user = new User({ id: 1 });
-    var user2 = new User({ id: 5 });
+    var user = new User({ id: 1, name: 'test' });
+    var user2 = new User({ id: 5, name: 'test2' });
 
-    expect(user.id).to.equal(2);
-    expect(user2.id).to.equal(6);
-    done();
+    user.validate().then(function () {
+
+        expect(user.id).to.equal(2);
+        return user2.validate();
+    }).then(function () {
+
+        expect(user2.id).to.equal(6);
+        done();
+    });
 });
 
 lab.test('fires the create event when instantiating a model', function (done) {
@@ -648,12 +637,10 @@ lab.test('fires the create event when instantiating a model', function (done) {
 
         expect(model).to.exist();
         expect(model.schema.isJoi).to.equal(true);
-        model.on('create', function (model, next) {
+        model.on('create', function (model) {
 
             expect(model.name).to.equal('test');
             expect(model.age).to.equal(20);
-            next();
-
             done();
         });
     };
