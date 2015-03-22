@@ -1,5 +1,6 @@
 var Factory = require('..');
 var Joi = require('joi');
+var Promise = require('spit').Promise;
 
 var lab = exports.lab = require('lab').script();
 var expect = require('code').expect;
@@ -538,7 +539,7 @@ lab.test('can use preValidate to populate model fields', function (done) {
     User.register(Plugin);
 
     var user = new User({ name: 'test' });
-    user.validate().then(function () {
+    user.validate().then(function (user) {
 
         expect(user.id).to.equal('other_id');
         expect(user.admin).to.equal(false);
