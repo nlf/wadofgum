@@ -152,6 +152,9 @@ lab.test('calling validate converts valid keys to the correct type', function (d
             favorites: {
                 number: Joi.number().integer()
             },
+            extras: {
+                likesMelon: Joi.boolean()
+            },
             age: Joi.number().integer().default(20)
         }
     });
@@ -206,6 +209,48 @@ lab.test('calling validate reports multiple errors', function (done) {
         expect(user.age).to.equal('test');
         done();
     });
+});
+
+lab.test('calling validate removes renamed keys', function (done) {
+
+    var User = new Factory({
+        type: 'user',
+        schema: Joi.object({
+            name: Joi.string(),
+            age: Joi.number().integer()
+        }).rename('_age', 'age')
+    });
+
+    var user = new User({ _age: 30 });
+    user.validate()
+        .then(function () {
+
+            expect(user.age).to.equal(30);
+            expect(user._age).to.not.exist();
+            done();
+        })
+        .catch(done);
+});
+
+lab.test('calling validate does not remove aliased renamed keys', function (done) {
+
+    var User = new Factory({
+        type: 'user',
+        schema: Joi.object({
+            name: Joi.string(),
+            age: Joi.number().integer()
+        }).rename('_age', 'age', { alias: true })
+    });
+
+    var user = new User({ _age: 30 });
+    user.validate()
+        .then(function () {
+
+            expect(user.age).to.equal(30);
+            expect(user._age).to.equal(30);
+            done();
+        })
+        .catch(done);
 });
 
 lab.test('can use a plugin', function (done) {
