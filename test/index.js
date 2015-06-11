@@ -1,6 +1,5 @@
 var Factory = require('..');
 var Joi = require('joi');
-var Promise = require('spit').Promise;
 
 var lab = exports.lab = require('lab').script();
 var expect = require('code').expect;
@@ -363,10 +362,12 @@ lab.test('throws when trying to use an invalid plugin', function (done) {
     });
 
     expect(function () {
+
         User.register({});
     }).to.throw('Invalid plugin');
 
     expect(function () {
+
         User.register('broken');
     }).to.throw('Invalid plugin');
 
