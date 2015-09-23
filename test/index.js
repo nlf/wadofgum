@@ -576,19 +576,19 @@ lab.test('can use preValidate to populate model fields', function (done) {
 
         model.schema = { admin: Joi.boolean().default(false) };
 
-        model.prototype.on('preValidate', function (model) {
+        model.prototype.on('preValidate', function (mod) {
 
-            model.id = 'other_id';
+            mod.id = 'other_id';
         });
     };
 
     User.register(Plugin);
 
     var user = new User({ name: 'test' });
-    user.validate().then(function (user) {
+    user.validate().then(function (userModel) {
 
-        expect(user.id).to.equal('other_id');
-        expect(user.admin).to.equal(false);
+        expect(userModel.id).to.equal('other_id');
+        expect(userModel.admin).to.equal(false);
         done();
     });
 });
@@ -611,14 +611,14 @@ lab.test('can use preValidate twice', function (done) {
             id: Joi.string().default('some_id')
         });
 
-        model.prototype.on('preValidate', function (model) {
+        model.prototype.on('preValidate', function (mod) {
 
-            model.id = 'other_id';
+            mod.id = 'other_id';
         });
 
-        model.prototype.on('preValidate', function (model) {
+        model.prototype.on('preValidate', function (mod) {
 
-            model.age += 1;
+            mod.age += 1;
         });
     };
 
@@ -648,9 +648,9 @@ lab.test('uses separate event emitters for different instances', function (done)
 
         expect(model).to.exist();
         expect(model.schema.isJoi).to.equal(true);
-        model.prototype.on('preValidate', function (model) {
+        model.prototype.on('preValidate', function (mod) {
 
-            ++model.id;
+            ++mod.id;
         });
     };
 
@@ -684,10 +684,10 @@ lab.test('fires the create event when instantiating a model', function (done) {
 
         expect(model).to.exist();
         expect(model.schema.isJoi).to.equal(true);
-        model.on('create', function (model) {
+        model.on('create', function (mod) {
 
-            expect(model.name).to.equal('test');
-            expect(model.age).to.equal(20);
+            expect(mod.name).to.equal('test');
+            expect(mod.age).to.equal(20);
             done();
         });
     };
