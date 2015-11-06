@@ -16,6 +16,16 @@ it('can create a model instance', function (done) {
     done();
 });
 
+it('can set and get type property', function (done) {
+
+    let Test = class extends Model {};
+    Test.type = 'test';
+    expect(Test.type).to.equal('test');
+    class User extends Model {};
+    expect(User.type).to.equal('User');
+    done();
+});
+
 it('can create an instance with no fields', function (done) {
 
     class User extends Model {};
