@@ -1,24 +1,24 @@
 'use strict';
 
-let Model = require('..');
+const Model = require('..');
 
-let lab = exports.lab = require('lab').script();
-let expect = require('code').expect;
-let it = lab.test;
+const lab = exports.lab = require('lab').script();
+const expect = require('code').expect;
+const it = lab.test;
 
-it('can create a model instance', function (done) {
+it('can create a model instance', (done) => {
 
     class User extends Model {};
-    let user = new User({ name: 'test', age: '30' });
+    const user = new User({ name: 'test', age: '30' });
     expect(user).to.exist();
     expect(user.name).to.equal('test');
     expect(user.age).to.equal('30');
     done();
 });
 
-it('can set and get type property', function (done) {
+it('can set and get type property', (done) => {
 
-    let Test = class extends Model {};
+    const Test = class extends Model {};
     Test.type = 'test';
     expect(Test.type).to.equal('test');
     class User extends Model {};
@@ -26,15 +26,15 @@ it('can set and get type property', function (done) {
     done();
 });
 
-it('can create an instance with no fields', function (done) {
+it('can create an instance with no fields', (done) => {
 
     class User extends Model {};
-    let user = new User();
+    const user = new User();
     expect(Object.keys(user).length).to.equal(0);
     done();
 });
 
-it('can set metadata on a class', function (done) {
+it('can set metadata on a class', (done) => {
 
     class User extends Model {};
     User.meta.set('key', 'value');
@@ -44,7 +44,7 @@ it('can set metadata on a class', function (done) {
     done();
 });
 
-it('can see if a key exists in metadata', function (done) {
+it('can see if a key exists in metadata', (done) => {
 
     class User extends Model {};
     expect(User.meta.has('key')).to.equal(false);
@@ -53,20 +53,20 @@ it('can see if a key exists in metadata', function (done) {
     done();
 });
 
-it('returns undefined when getting metadata that has not been set', function (done) {
+it('returns undefined when getting metadata that has not been set', (done) => {
 
     class User extends Model {};
     expect(User.meta.get('test')).to.not.exist();
     done();
 });
 
-it('can extend a class with a mixin', function (done) {
+it('can extend a class with a mixin', (done) => {
 
-    let mixin = function (baseClass) {
+    const mixin = function (baseClass) {
 
         class SubModel extends baseClass {
 
-            static extended () {
+            static extended() {
 
                 return true;
             };
@@ -81,13 +81,13 @@ it('can extend a class with a mixin', function (done) {
     done();
 });
 
-it('can extend a class with multiple mixins', function (done) {
+it('can extend a class with multiple mixins', (done) => {
 
-    let mixin = function (baseClass) {
+    const mixin = function (baseClass) {
 
         class SubModel extends baseClass {
 
-            static extended () {
+            static extended() {
 
                 return true;
             };
@@ -96,11 +96,11 @@ it('can extend a class with multiple mixins', function (done) {
         return SubModel;
     };
 
-    let mixin2 = function (baseClass) {
+    const mixin2 = function (baseClass) {
 
         class SubModel extends baseClass {
 
-            static extendedAgain () {
+            static extendedAgain() {
 
                 return true;
             }
