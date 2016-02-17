@@ -49,3 +49,5 @@ class Model extends Wadofgum.mixin(myMixin) {};
 Model.myMethod(); // 'called myMethod'
 Model.capabilities.has('myMethod'); // true
 ```
+
+Note: extensions that want to process their options should add a getter and setter for them, and set the value in `.meta`.
