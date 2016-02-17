@@ -1,6 +1,6 @@
 {
   "name": "wadofgum",
-  "version": "4.1.0",
+  "version": "5.0.0",
   "description": "simple highly extensible es6 models",
   "main": "lib/index.js",
   "scripts": {
