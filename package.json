@@ -21,6 +21,7 @@
   "homepage": "https://github.com/nlf/wadofgum",
   "devDependencies": {
     "code": "^2.0.0",
+    "eslint-config-andyet": "^1.0.0",
     "lab": "^7.0.0"
   },
   "engines": {

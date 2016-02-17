@@ -8,110 +8,83 @@ const it = lab.test;
 
 it('can create a model instance', (done) => {
 
-    class User extends Model {};
-    const user = new User({ name: 'test', age: '30' });
-    expect(user).to.exist();
-    expect(user.name).to.equal('test');
-    expect(user.age).to.equal('30');
-    done();
+  class User extends Model {};
+  const user = new User({ someflag: true, schema: 'hi' });
+  expect(user).to.exist();
+  expect(user.schema).to.equal('hi');
+  expect(user.someflag).to.equal(true);
+  done();
 });
 
-it('can set and get type property', (done) => {
+it('can create model instance with no options', (done) => {
 
-    const Test = class extends Model {};
-    Test.type = 'test';
-    expect(Test.type).to.equal('test');
-    class User extends Model {};
-    expect(User.type).to.equal('User');
-    done();
+  class User extends Model {};
+  const user = new User();
+  expect(Object.keys(user).length).to.equal(0);
+  done();
 });
 
-it('can create an instance with no fields', (done) => {
+it('can use capabilities', (done) => {
 
-    class User extends Model {};
-    const user = new User();
-    expect(Object.keys(user).length).to.equal(0);
-    done();
-});
-
-it('can set metadata on a class', (done) => {
-
-    class User extends Model {};
-    User.meta.set('key', 'value');
-    expect(User.meta.get('key')).to.equal('value');
-    User.meta.set('object', { some: 'thing' });
-    expect(User.meta.get('object')).to.deep.equal({ some: 'thing' });
-    done();
-});
-
-it('can see if a key exists in metadata', (done) => {
-
-    class User extends Model {};
-    expect(User.meta.has('key')).to.equal(false);
-    User.meta.set('key', 'value');
-    expect(User.meta.has('key')).to.equal(true);
-    done();
-});
-
-it('returns undefined when getting metadata that has not been set', (done) => {
-
-    class User extends Model {};
-    expect(User.meta.get('test')).to.not.exist();
-    done();
+  class User extends Model {};
+  User.capabilities.add('derp');
+  const user = new User();
+  expect(user.capabilities.has('derp')).to.equal(true);
+  done();
 });
 
 it('can extend a class with a mixin', (done) => {
 
-    const mixin = function (baseClass) {
+  const mixin = function (baseClass) {
 
-        class SubModel extends baseClass {
+    class SubModel extends baseClass {
 
-            static extended() {
+      static extended () {
 
-                return true;
-            };
-        };
-
-        return SubModel;
+        return true;
+      };
     };
 
-    class User extends Model.mixin(mixin) {};
-    expect(User).to.exist();
-    expect(User.extended()).to.equal(true);
-    done();
+    return SubModel;
+  };
+
+  class User extends Model.mixin(mixin) {};
+  expect(User).to.exist();
+  expect(User.extended()).to.equal(true);
+  done();
 });
 
 it('can extend a class with multiple mixins', (done) => {
 
-    const mixin = function (baseClass) {
+  const mixin = function (baseClass) {
 
-        class SubModel extends baseClass {
+    class SubModel extends baseClass {
 
-            static extended() {
+      static extended () {
 
-                return true;
-            };
-        };
-
-        return SubModel;
+        return true;
+      };
     };
 
-    const mixin2 = function (baseClass) {
+    return SubModel;
+  };
 
-        class SubModel extends baseClass {
+  const mixin2 = function (baseClass) {
 
-            static extendedAgain() {
+    class SubModel extends baseClass {
 
-                return true;
-            }
-        };
+      static extendedAgain () {
 
-        return SubModel;
+        return true;
+      }
     };
 
-    class User extends Model.mixin(mixin, mixin2) {};
-    expect(User).to.exist();
-    expect(User.extended()).to.equal(true);
-    expect(User.extendedAgain()).to.equal(true);
-    done();
+    return SubModel;
+  };
+
+  class User extends Model.mixin(mixin, mixin2) {};
+  expect(User).to.exist();
+  expect(User.extended()).to.equal(true);
+  expect(User.extendedAgain()).to.equal(true);
+  done();
 });
